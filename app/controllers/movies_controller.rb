@@ -11,11 +11,16 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @all_ratings = Movie.ratings
     sorted_key = params.fetch(:sorted, nil)
+    ratings = params.fetch(:ratings, nil)
     if sorted_key == 'title'
       @movies = Movie.order :title
     elsif sorted_key == 'release_date'
       @movies = Movie.order :release_date
+    elsif ratings != nil
+      @checked_ratings = ratings.keys
+      @movies = Movie.with_ratings @checked_ratings
     else
       @movies = Movie.all
     end
