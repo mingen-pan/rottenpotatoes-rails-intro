@@ -11,18 +11,34 @@ class MoviesController < ApplicationController
   end
 
   def index
+    ## a variable for index to read every option
     @all_ratings = Movie.ratings
+    @checked_ratings = @all_ratings.clone
     sorted_key = params.fetch(:sorted, nil)
     ratings = params.fetch(:ratings, nil)
-    if sorted_key == 'title'
-      @movies = Movie.order :title
-    elsif sorted_key == 'release_date'
-      @movies = Movie.order :release_date
-    elsif ratings != nil
-      @checked_ratings = ratings.keys
-      @movies = Movie.with_ratings @checked_ratings
+
+    if sorted_key != nil
+      session[:sorted_key] = sorted_key
+    end
+    if ratings != nil
+      session[:ratings] = ratings.keys
     else
-      @movies = Movie.all
+      session[:ratings] = @all_ratings
+    end
+
+    @movies = Movie.all
+    if (session.key? :sorted_key) || (session.key? :ratings)
+
+      if session[:ratings] != nil
+        @checked_ratings = session[:ratings]
+        @movies = @movies.with_ratings @checked_ratings
+      end
+
+      if session[:sorted_key] == 'title'
+        @movies = @movies.order :title
+      elsif session[:sorted_key] == 'release_date'
+        @movies = @movies.order :release_date
+      end
     end
   end
 
